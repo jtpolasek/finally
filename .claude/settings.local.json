@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(codex exec:*)",
+      "Bash(head -645 \"/c/Program Files/AI/finally/planning/PLAN.md\")",
+      "Read(//tmp/**)",
+      "Skill(update-config)",
+      "WebSearch",
+      "WebFetch(domain:massive.com)",
+      "WebFetch(domain:polygon.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:polygon.readthedocs.io)"
+    ]
+  }
+}
