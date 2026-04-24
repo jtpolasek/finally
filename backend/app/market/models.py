@@ -37,7 +37,12 @@ class PriceUpdate:
         return "flat"
 
     def to_dict(self) -> dict:
-        """Serialize for JSON / SSE transmission."""
+        """Serialize to a Python dict using internal field names.
+
+        This is the internal representation (previous_price, Unix timestamp).
+        It is NOT the SSE wire format — the SSE endpoint builds its own dict
+        with prev_price and an ISO 8601 timestamp per PLAN.md.
+        """
         return {
             "ticker": self.ticker,
             "price": self.price,

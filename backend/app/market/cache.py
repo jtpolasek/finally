@@ -63,7 +63,13 @@ class PriceCache:
 
     @property
     def version(self) -> int:
-        """Current version counter. Useful for SSE change detection."""
+        """Current version counter. Useful for SSE change detection.
+
+        Read without a lock: CPython guarantees that integer reads and
+        writes are atomic under the GIL. This is intentional — `version`
+        is on the hot SSE polling path (called every 500ms per client)
+        and avoiding lock overhead matters at scale.
+        """
         return self._version
 
     def __len__(self) -> int:

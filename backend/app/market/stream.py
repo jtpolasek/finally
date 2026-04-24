@@ -15,8 +15,6 @@ from .cache import PriceCache
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/stream", tags=["streaming"])
-
 # Seconds between keepalive comments when the watchlist is empty.
 # Prevents browser EventSource from timing out the idle connection.
 KEEPALIVE_INTERVAL = 15.0
@@ -25,8 +23,11 @@ KEEPALIVE_INTERVAL = 15.0
 def create_stream_router(price_cache: PriceCache) -> APIRouter:
     """Create the SSE streaming router with a reference to the price cache.
 
-    This factory pattern lets us inject the PriceCache without globals.
+    A new APIRouter is created on each call so that calling this factory
+    more than once (e.g., in tests) does not register duplicate routes on
+    a shared singleton.
     """
+    router = APIRouter(prefix="/api/stream", tags=["streaming"])
 
     @router.get("/prices")
     async def stream_prices(request: Request) -> StreamingResponse:
@@ -75,6 +76,11 @@ async def _generate_events(
     changes, emits one 'price' event per updated ticker. When the watchlist
     is empty and no events have been sent for KEEPALIVE_INTERVAL seconds,
     emits a keepalive comment to prevent connection timeouts.
+
+    Note: PLAN.md specifies a queue-per-client broadcast model. This
+    implementation uses version polling instead — simpler to reason about,
+    produces evenly-spaced updates for sparkline rendering, and has
+    imperceptible latency difference at the 500ms simulator cadence.
     """
     # Tell the client to retry after 1 second if the connection drops
     yield "retry: 1000\n\n"
